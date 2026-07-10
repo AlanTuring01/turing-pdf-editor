@@ -782,6 +782,21 @@ function wireViewer() {
 
     if (state.tool === 'select') {
       if (!e.target.closest('.ob')) select(null);
+      // a plain click (no drag, no text selection) on text starts editing it,
+      // so the default tool "just works" — dragging still selects text to copy
+      const span = e.target.closest('.textLayer span');
+      if (span && !e.target.closest('.edit-input')) {
+        const sx = e.clientX, sy = e.clientY;
+        const onUp = ev => {
+          window.removeEventListener('pointerup', onUp);
+          if (Math.hypot(ev.clientX - sx, ev.clientY - sy) > 4) return;
+          const sel = window.getSelection();
+          if (sel && !sel.isCollapsed) return;
+          const hit = findRunFromSpan(span);
+          if (hit) beginRunEdit(hit.ps, hit.run);
+        };
+        window.addEventListener('pointerup', onUp);
+      }
       return;
     }
 
@@ -793,6 +808,9 @@ function wireViewer() {
       if (span) {
         const hit = findRunFromSpan(span);
         if (hit) { e.preventDefault(); beginRunEdit(hit.ps, hit.run); }
+      } else if (ps.runs && ps.runs.length === 0) {
+        // no text layer at all — almost certainly a scanned page
+        toast(t('toast.noText'), 4200);
       }
       return;
     }
