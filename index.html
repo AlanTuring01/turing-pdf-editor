@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nib — a tiny PDF editor</title>
+<meta name="description" content="Edit PDF text, sign and white-out — entirely in your browser. No uploads, no accounts, no tracking.">
+<link rel="icon" type="image/svg+xml" href="assets/nib.svg">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><img src="assets/nib.svg" alt=""><span>Nib</span></div>
+
+  <nav class="tools" id="tools">
+    <button class="tool active" data-tool="select" data-i18n-title="tool.select" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3.5 11 20l2.2-6.8L20 11z"/></svg>
+    </button>
+    <button class="tool" data-tool="edit" data-i18n-title="tool.edit" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.12 2.12 0 0 0-3-3L5 17z"/><path d="m13.5 6.5 3 3"/></svg>
+    </button>
+    <button class="tool" data-tool="text" data-i18n-title="tool.text" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h12v2"/><path d="M10 5v14"/><path d="M7 19h6"/><path d="M18 12v6"/><path d="M15 15h6"/></svg>
+    </button>
+    <button class="tool" data-tool="sign" data-i18n-title="tool.sign" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17c2.5 0 2.2-5.5 4.5-5.5S9.7 17 12 17s2.2-5.5 4.5-5.5S18.5 17 21 17"/><path d="M3.5 21h17"/></svg>
+    </button>
+    <button class="tool" data-tool="white" data-i18n-title="tool.white" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 5 5L10 19H5v-5z"/><path d="m13 6 5 5"/><path d="M13 19h8"/></svg>
+    </button>
+  </nav>
+
+  <div class="spacer"></div>
+
+  <div class="right">
+    <button class="icon-btn" id="openBtn" data-i18n-title="open.title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V6a2 2 0 0 1 2-2h4.6l2 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    </button>
+    <div class="sep"></div>
+    <button class="icon-btn" id="zoomOut" data-i18n-title="zoom.out" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 12h12"/></svg>
+    </button>
+    <button class="zoom-pct" id="zoomPct" data-i18n-title="zoom.fit" disabled>100%</button>
+    <button class="icon-btn" id="zoomIn" data-i18n-title="zoom.in" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>
+    </button>
+    <div class="sep"></div>
+    <button class="icon-btn" id="undoBtn" data-i18n-title="undo" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+    </button>
+    <button class="icon-btn" id="redoBtn" data-i18n-title="redo" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>
+    </button>
+    <div class="sep"></div>
+    <button class="lang-btn" id="langToggle">中</button>
+    <button class="btn-primary" id="saveBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      <span data-i18n="download">Download</span>
+    </button>
+  </div>
+</header>
+
+<main id="viewer">
+  <div id="drop" class="drop">
+    <div class="drop-card" id="dropCard">
+      <img src="assets/nib.svg" alt="Nib">
+      <h1 data-i18n="drop.title">Drop a PDF here</h1>
+      <p>
+        <span data-i18n="drop.or">or</span>
+        <button class="linklike" id="browseBtn" data-i18n="drop.browse">choose a file</button>
+        ·
+        <button class="linklike" id="sampleBtn" data-i18n="drop.sample">try the sample</button>
+      </p>
+      <p class="privacy">🔒 <span data-i18n="drop.privacy">100% local — your file never leaves this device.</span></p>
+    </div>
+  </div>
+  <div id="pages" class="pages" hidden></div>
+</main>
+
+<input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+<input type="file" id="fontInput" accept=".ttf,.otf,font/ttf,font/otf" hidden>
+<input type="file" id="sigFileInput" accept="image/png,image/jpeg" hidden>
+
+<div id="toast" class="toast"></div>
+
+<!-- signature modal -->
+<div id="sigModal" class="modal" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 data-i18n="sig.title">Add your signature</h2>
+      <button class="modal-close" data-close="sigModal">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs" id="sigTabs">
+        <button data-tab="draw" class="active" data-i18n="sig.draw">Draw</button>
+        <button data-tab="type" data-i18n="sig.type">Type</button>
+        <button data-tab="upload" data-i18n="sig.upload">Upload</button>
+      </div>
+      <div id="sigTabDraw">
+        <canvas id="sigPad"></canvas>
+        <div class="sig-row">
+          <button class="color-dot active" data-ink="#1b1b1f" style="background:#1b1b1f"></button>
+          <button class="color-dot" data-ink="#1e40af" style="background:#1e40af"></button>
+          <span class="grow"></span>
+          <button class="btn-ghost" id="sigClear" data-i18n="sig.clear">Clear</button>
+        </div>
+      </div>
+      <div id="sigTabType" hidden>
+        <input id="sigText" data-i18n-ph="sig.typePlaceholder" placeholder="Type your name" autocomplete="off">
+        <div class="sig-previews" id="sigPreviews"></div>
+      </div>
+      <div id="sigTabUpload" hidden>
+        <div class="upload-zone" id="sigUploadZone">
+          <span data-i18n="sig.uploadHint">PNG or JPG — a photo of your paper signature works too.</span>
+        </div>
+        <label class="check"><input type="checkbox" id="sigRemoveWhite" checked> <span data-i18n="sig.removeWhite">Remove white background</span></label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" data-close="sigModal" data-i18n="sig.cancel">Cancel</button>
+      <button class="btn-primary" id="sigUse" data-i18n="sig.use">Use signature</button>
+    </div>
+  </div>
+</div>
+
+<!-- unicode font modal -->
+<div id="fontModal" class="modal" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 data-i18n="font.title">A Unicode font is needed</h2>
+      <button class="modal-close" data-close="fontModal">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-note" data-i18n="font.body"></p>
+      <div class="font-actions">
+        <button class="font-btn" id="fontLocalBtn">
+          <span data-i18n="font.local">Use a system font</span>
+          <small data-i18n="font.localHint">Chrome / Edge only</small>
+        </button>
+        <button class="font-btn" id="fontPickBtn">
+          <span data-i18n="font.pick">Choose a font file (.ttf / .otf)</span>
+        </button>
+      </div>
+      <div class="font-status" id="fontStatus"></div>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="vendor/fontkit.umd.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

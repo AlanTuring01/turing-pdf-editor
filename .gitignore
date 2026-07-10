@@ -1,0 +1,4 @@
+.DS_Store
+_testfont.ttf
+docs/_e2e-*
+node_modules/
