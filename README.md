@@ -57,13 +57,15 @@ Or skip all that and use the **[live demo](https://alanturing01.github.io/turing
   <img src="docs/signature.png" alt="Signature modal with a drawn stroke" width="480">
 </div>
 
+**🖼 Insert images.** Logos, stamps, charts, photos — pick a file, drag one onto the page, or just paste a screenshot with <kbd>Cmd/Ctrl</kbd>+<kbd>V</kbd>. Drag to move, corner-drag to resize (aspect locked). JPEGs are embedded as JPEG, so photos don't balloon the file size.
+
 **➕ Add text & white-out.** New text with adjustable size, three colors, multiline. White-out auto-samples the page background color, so it works on non-white pages too.
 
 **🔍 Scanned PDFs? OCR them.** A scanned page is just pixels — hit **Recognize text (OCR)** and an on-device engine (tesseract.js; English & Simplified Chinese bundled) turns it into clickable, editable lines. Your fix is written into the PDF as *real* text — the corrected line is selectable in the output, which is more than the original scan could say. Nothing is uploaded, ever.
 
 **🌏 中文, 日本語, any Unicode.** PDF's 14 built-in fonts are Latin-only — which is why most tools silently break on Chinese or Japanese text. Turing asks once for a font — picked from your system via the Local Font Access API (Chrome/Edge), or drop in any `.ttf`/`.otf` — and embeds only the glyphs you used.
 
-**⌨️ Feels like a real editor.** Undo/redo everything (<kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd>), zoom, one-key tool switching: <kbd>V</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>S</kbd> <kbd>W</kbd>.
+**⌨️ Feels like a real editor.** Undo/redo everything (<kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd>), zoom, one-key tool switching: <kbd>V</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>S</kbd> <kbd>I</kbd> <kbd>W</kbd>.
 
 **🌐 中文/English UI**, auto-detected, one-click toggle. Light and dark theme, following your system.
 

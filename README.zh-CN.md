@@ -57,13 +57,15 @@ python3 -m http.server 8080    # or: npx serve
   <img src="docs/signature.png" alt="Signature modal with a drawn stroke" width="480">
 </div>
 
+**🖼 插入图片。** Logo、印章、图表、照片——选文件、把图拖到页面上，或者直接 <kbd>Cmd/Ctrl</kbd>+<kbd>V</kbd> 粘贴一张截图。拖动移动、拖角缩放（锁定比例）。JPEG 按 JPEG 嵌入，照片不会把文件撑大。
+
 **➕ 加文字和涂白。** 新文字可调字号、三种颜色、支持多行。涂白会自动采样页面背景色，非白底页面照样能用。
 
 **🔍 扫描件？OCR 它。** 扫描页只是一堆像素——点一下**识别文字 (OCR)**，本机识别引擎（tesseract.js，内置英文和简体中文）就把它变成一行行可点击、可编辑的文字。你改的内容会以*真正的文本*写进 PDF——导出后那一行可以被选中复制，比原始扫描件还强。全程零上传。
 
 **🌏 中文、日本語，任何 Unicode。** PDF 的 14 个内置字体只认拉丁字母——这就是大多数工具碰上中文日文会悄悄坏掉的原因。Turing 只问你要一次字体：通过 Local Font Access API 从系统里挑（Chrome/Edge），或拖进任意 `.ttf`/`.otf`——然后只内嵌你用到的字形。
 
-**⌨️ 手感像个真编辑器。** 全程可撤销/重做（<kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd>），缩放，单键切换工具：<kbd>V</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>S</kbd> <kbd>W</kbd>。
+**⌨️ 手感像个真编辑器。** 全程可撤销/重做（<kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd>），缩放，单键切换工具：<kbd>V</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>S</kbd> <kbd>I</kbd> <kbd>W</kbd>。
 
 **🌐 中文/English 界面**，自动识别，一键切换。浅色深色主题，跟随系统。
 

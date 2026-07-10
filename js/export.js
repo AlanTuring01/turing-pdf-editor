@@ -95,7 +95,9 @@ export async function exportPdf(state, acquireUnicodeFont) {
       const p = placeBox(vp1, op.nx, op.ny, op.nw, op.nh);
       if (!imgCache.has(op.dataUrl)) {
         const bytes = dataUrlBytes(op.dataUrl);
-        imgCache.set(op.dataUrl, await doc.embedPng(bytes));
+        imgCache.set(op.dataUrl, op.dataUrl.startsWith('data:image/jpeg')
+          ? await doc.embedJpg(bytes)   // photos keep their JPEG encoding
+          : await doc.embedPng(bytes));
       }
       page.drawImage(imgCache.get(op.dataUrl), {
         x: p.x, y: p.y, width: p.w, height: p.h, rotate: degrees(p.rot),

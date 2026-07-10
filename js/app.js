@@ -36,6 +36,7 @@ const state = {
   fontBytes: null,         // user-provided unicode font
   dirty: false,
   pendingSig: null,        // signature waiting for placement {dataUrl,width,height}
+  pendingImg: null,        // image waiting for placement {dataUrl,width,height}
 };
 
 // console / testing API
@@ -116,7 +117,7 @@ async function openBytes(bytes, name) {
   state.pdfDoc = doc;
   state.fileName = name || 'document.pdf';
   state.ops = []; state.undoStack = []; state.redoStack = [];
-  state.selected = null; state.dirty = false; state.pendingSig = null;
+  state.selected = null; state.dirty = false; state.pendingSig = null; state.pendingImg = null;
   state.pages = [];
   pagesEl.innerHTML = '';
 
@@ -590,6 +591,7 @@ function setTool(name) {
   document.body.className = `mode-${name}`;
   if (name !== 'select') select(null);
   if (name !== 'sign') state.pendingSig = null;
+  if (name !== 'image') state.pendingImg = null;
 }
 
 // --- edit existing text ---
@@ -847,6 +849,14 @@ function wireViewer() {
       return;
     }
 
+    if (state.tool === 'image') {
+      if (!state.pendingImg) return;
+      e.preventDefault();
+      const img = state.pendingImg;
+      placeImageOp(ps, pageIdx, nPoint(ps, e), img);
+      return;
+    }
+
     if (state.tool === 'white') {
       e.preventDefault();
       const start = nPoint(ps, e);
@@ -877,6 +887,76 @@ function wireViewer() {
       window.addEventListener('pointercancel', onUp);
     }
   });
+}
+
+/* =============== image insertion =============== */
+
+// Normalizes any raster file to an embeddable data-URL. The real format is
+// sniffed from magic bytes (file.type lies for renamed files), and everything
+// is re-encoded through a canvas: that bakes EXIF orientation into the pixels
+// (pdf-lib ignores the tag) and guarantees the bytes match the label.
+// Real JPEGs re-encode as JPEG so photos don't balloon; the rest becomes PNG.
+async function loadImageFile(file) {
+  const head = new Uint8Array(await file.slice(0, 3).arrayBuffer());
+  const isJpeg = head[0] === 0xff && head[1] === 0xd8; // SOI marker
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    const max = 2400;
+    const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.max(1, Math.round(img.naturalWidth * k));
+    const h = Math.max(1, Math.round(img.naturalHeight * k));
+    const cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    cv.getContext('2d').drawImage(img, 0, 0, w, h);
+    const dataUrl = cv.toDataURL(isJpeg ? 'image/jpeg' : 'image/png', 0.92);
+    return { dataUrl, width: w, height: h };
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function anyModalOpen() {
+  return !$('#sigModal').hidden || !$('#fontModal').hidden || !$('#ocrModal').hidden;
+}
+
+// Places an image op centered on the given normalized point of a page.
+function placeImageOp(ps, pageIdx, pt, imgData) {
+  const pageW = ps.viewport1.width;
+  // 96 css px ≈ 72 pt: natural size feels right for screenshots and logos
+  const nw = Math.max(24, Math.min(imgData.width * 0.75, pageW * 0.6));
+  const nh = nw * imgData.height / imgData.width;
+  const pageH = ps.viewport1.height;
+  const op = {
+    type: 'image', page: pageIdx, dataUrl: imgData.dataUrl,
+    nx: Math.min(Math.max(pt.nx - nw / 2, 12 - nw), pageW - 12),
+    ny: Math.min(Math.max(pt.ny - nh / 2, 12 - nh), pageH - 12),
+    nw, nh,
+  };
+  addOp(op);
+  setTool('select');
+  select(op);
+  renderOpsForPage(pageIdx);
+  return op;
+}
+
+// Most visible page + its center point — for paste and off-page drops.
+function visiblePageCenter() {
+  const vr = viewerEl.getBoundingClientRect();
+  let best = null, bestArea = 0;
+  for (const ps of state.pages) {
+    if (!ps.rendered) continue;
+    const r = ps.el.getBoundingClientRect();
+    const area = Math.max(0, Math.min(r.bottom, vr.bottom) - Math.max(r.top, vr.top))
+      * Math.max(0, Math.min(r.right, vr.right) - Math.max(r.left, vr.left));
+    if (area > bestArea) { bestArea = area; best = ps; }
+  }
+  if (!best) return null;
+  const r = best.el.getBoundingClientRect();
+  const cx = (Math.max(r.left, vr.left) + Math.min(r.right, vr.right)) / 2;
+  const cy = (Math.max(r.top, vr.top) + Math.min(r.bottom, vr.bottom)) / 2;
+  return { ps: best, pt: nPoint(best, { clientX: cx, clientY: cy }) };
 }
 
 /* =============== unicode font acquisition =============== */
@@ -1050,6 +1130,9 @@ function wireUI() {
         if (!sig) { setTool('select'); return; }
         state.pendingSig = sig;
         toast(t('toast.placeSign'), 4000);
+      } else if (b.dataset.tool === 'image') {
+        setTool('image');
+        $('#imgInput').click();
       } else setTool(b.dataset.tool);
     });
 
@@ -1060,6 +1143,43 @@ function wireUI() {
     $('#fileInput').value = '';
     if (f) openFile(f);
   });
+  $('#imgInput').addEventListener('change', async () => {
+    const f = $('#imgInput').files[0];
+    $('#imgInput').value = '';
+    if (!f) return;
+    try {
+      const img = await loadImageFile(f);
+      if (state.tool !== 'image') return; // user switched tools while decoding
+      state.pendingImg = img;
+      toast(t('toast.placeImage'), 4000);
+    } catch (e) {
+      console.error(e);
+      toast(t('toast.imgFail'));
+      setTool('select');
+    }
+  });
+  $('#imgInput').addEventListener('cancel', () => { if (state.tool === 'image') setTool('select'); });
+
+  // paste an image (e.g. a screenshot) straight onto the most visible page
+  window.addEventListener('paste', async e => {
+    if (!state.pdfDoc || anyModalOpen()) return;
+    if (/^(input|textarea)$/i.test(e.target.tagName) || e.target.isContentEditable) return;
+    const item = [...(e.clipboardData?.items || [])].find(it => it.type.startsWith('image/'));
+    if (!item) return;
+    e.preventDefault();
+    const file = item.getAsFile();
+    if (!file) return;
+    try {
+      const img = await loadImageFile(file);
+      const at = visiblePageCenter();
+      if (at) placeImageOp(at.ps, Number(at.ps.el.dataset.page), at.pt, img);
+      else toast(t('toast.imgNoPage'));
+    } catch (err) {
+      console.error(err);
+      toast(t('toast.imgFail'));
+    }
+  });
+
   $('#sampleBtn').addEventListener('click', async () => {
     try {
       const res = await fetch('assets/sample.pdf');
@@ -1082,10 +1202,28 @@ function wireUI() {
   for (const ev of ['dragover', 'drop']) window.addEventListener(ev, e => e.preventDefault());
   window.addEventListener('dragover', () => dropCard.classList.add('over'));
   window.addEventListener('dragleave', e => { if (!e.relatedTarget) dropCard.classList.remove('over'); });
-  window.addEventListener('drop', e => {
+  window.addEventListener('drop', async e => {
     dropCard.classList.remove('over');
-    const f = [...(e.dataTransfer?.files || [])].find(f2 => /\.pdf$/i.test(f2.name) || f2.type === 'application/pdf');
-    if (f) openFile(f);
+    const files = [...(e.dataTransfer?.files || [])];
+    const pdf = files.find(f2 => /\.pdf$/i.test(f2.name) || f2.type === 'application/pdf');
+    if (pdf) { openFile(pdf); return; }
+    const imgFile = files.find(f2 => /^image\/(png|jpe?g|webp)$/.test(f2.type));
+    if (imgFile && state.pdfDoc && !anyModalOpen()) {
+      try {
+        const img = await loadImageFile(imgFile);
+        const psEl = e.target.closest?.('.page');
+        if (psEl) {
+          const ps = state.pages[Number(psEl.dataset.page)];
+          if (ps.rendered) { placeImageOp(ps, Number(psEl.dataset.page), nPoint(ps, e), img); return; }
+        }
+        const at = visiblePageCenter();
+        if (at) placeImageOp(at.ps, Number(at.ps.el.dataset.page), at.pt, img);
+        else toast(t('toast.imgNoPage'));
+      } catch (err) {
+        console.error(err);
+        toast(t('toast.imgFail'));
+      }
+    }
   });
 
   window.addEventListener('keydown', e => {
@@ -1120,6 +1258,7 @@ function wireUI() {
     else if (e.key === 'e' || e.key === 'E') setTool('edit');
     else if (e.key === 't' || e.key === 'T') setTool('text');
     else if (e.key === 's' || e.key === 'S') document.querySelector('[data-tool="sign"]').click();
+    else if (e.key === 'i' || e.key === 'I') document.querySelector('[data-tool="image"]').click();
     else if (e.key === 'w' || e.key === 'W') setTool('white');
     else if (e.key === '+' || e.key === '=') setScale(state.scale + 0.1);
     else if (e.key === '-') setScale(state.scale - 0.1);
