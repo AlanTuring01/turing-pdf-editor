@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="assets/nib.svg" width="72" alt="Nib logo">
+<img src="assets/logo.svg" width="72" alt="Turing PDF Editor logo">
 
-# Nib
+# Turing PDF Editor
 
 **A tiny PDF editor that lives in your browser.**
 Click a line of text, retype it, download. The file never leaves your device.
@@ -12,46 +12,46 @@ Click a line of text, retype it, download. The file never leaves your device.
 [![100% client-side](https://img.shields.io/badge/100%25-client--side-6366f1.svg)](#privacy-the-actual-feature)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
-**[▶ Try it live](https://alanturing01.github.io/nibpdf/)** — no signup, no upload, no watermark.
+**[▶ Try it live](https://alanturing01.github.io/turing-pdf-editor/)** — no signup, no upload, no watermark.
 
 **English** | [简体中文](README.zh-CN.md)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="docs/hero-light.png">
-  <img src="docs/hero-light.png" alt="Nib editing a proposal PDF in the browser" width="880">
+  <img src="docs/hero-light.png" alt="Turing editing a proposal PDF in the browser" width="880">
 </picture>
 
 </div>
 
 It's 6:58 PM, the contract goes out at 7:00, and the date on page 3 says **March 12** instead of **March 21**. Your options used to be: upload the private contract to a stranger's server and get it back with a watermark, install a desktop suite weighing hundreds of megabytes, or print it, fix it with a pen, and scan it.
 
-Nib is the missing fourth option: open a tab, click the date, retype it, download.
+Turing PDF Editor is the missing fourth option: open a tab, click the date, retype it, download.
 
 ## Why you might like this
 
 - **Zero build step.** No bundler, no transpiler, no `node_modules`. Clone the repo, serve the folder with any static server, and it runs.
 - **~2,000 lines of vanilla JS** you can actually read in an afternoon. No framework. The whole app is right there.
 - **Vendored dependencies.** [pdf.js](https://mozilla.github.io/pdf.js/) v6 (rendering), [pdf-lib](https://pdf-lib.js.org/) (writing), and [fontkit](https://github.com/foliojs/fontkit) (font subsetting) live in the repo.
-- **A neat font-subsetting trick.** Non-Latin text needs an embedded font, so Nib subsets yours down to only the glyphs you used — a 22 MB font becomes ~16 KB inside the PDF.
+- **A neat font-subsetting trick.** Non-Latin text needs an embedded font, so Turing subsets yours down to only the glyphs you used — a 22 MB font becomes ~16 KB inside the PDF.
 
 ## Quickstart
 
 ```bash
-git clone https://github.com/AlanTuring01/nibpdf
-cd nibpdf
+git clone https://github.com/AlanTuring01/turing-pdf-editor
+cd turing-pdf-editor
 python3 -m http.server 8080    # or: npx serve
 ```
 
 Open <http://localhost:8080>. (ES modules + workers need HTTP — `file://` won't work.)
 
-Or skip all that and use the **[live demo](https://alanturing01.github.io/nibpdf/)** — it's the same static files, hosted on GitHub Pages.
+Or skip all that and use the **[live demo](https://alanturing01.github.io/turing-pdf-editor/)** — it's the same static files, hosted on GitHub Pages.
 
 ## Features
 
-**✏️ Edit text that's already in the PDF.** Click a line, retype, done. Nib merges fragmented PDF text runs into editable lines, samples the original ink and background colors from the rendered page, and matches font size and family (serif / sans / mono, bold / italic) — edits blend in like they were always there.
+**✏️ Edit text that's already in the PDF.** Click a line, retype, done. Turing merges fragmented PDF text runs into editable lines, samples the original ink and background colors from the rendered page, and matches font size and family (serif / sans / mono, bold / italic) — edits blend in like they were always there.
 
-**🖋 Signatures.** Draw with mouse or finger (smoothed strokes, black or blue ink), type your name in cursive or serif styles, or upload a photo of a paper signature — Nib strips the white background automatically. Drag and resize anywhere.
+**🖋 Signatures.** Draw with mouse or finger (smoothed strokes, black or blue ink), type your name in cursive or serif styles, or upload a photo of a paper signature — Turing strips the white background automatically. Drag and resize anywhere.
 
 <div align="center">
   <img src="docs/signature.png" alt="Signature modal with a drawn stroke" width="480">
@@ -59,7 +59,7 @@ Or skip all that and use the **[live demo](https://alanturing01.github.io/nibpdf
 
 **➕ Add text & white-out.** New text with adjustable size, three colors, multiline. White-out auto-samples the page background color, so it works on non-white pages too.
 
-**🌏 中文, 日本語, any Unicode.** PDF's 14 built-in fonts are Latin-only — which is why most tools silently break on Chinese or Japanese text. Nib asks once for a font — picked from your system via the Local Font Access API (Chrome/Edge), or drop in any `.ttf`/`.otf` — and embeds only the glyphs you used.
+**🌏 中文, 日本語, any Unicode.** PDF's 14 built-in fonts are Latin-only — which is why most tools silently break on Chinese or Japanese text. Turing asks once for a font — picked from your system via the Local Font Access API (Chrome/Edge), or drop in any `.ttf`/`.otf` — and embeds only the glyphs you used.
 
 **⌨️ Feels like a real editor.** Undo/redo everything (<kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd>), zoom, one-key tool switching: <kbd>V</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>S</kbd> <kbd>W</kbd>.
 
@@ -69,7 +69,7 @@ Or skip all that and use the **[live demo](https://alanturing01.github.io/nibpdf
 
 ## Privacy (the actual feature)
 
-Nib is **100% client-side**. Your file **never** leaves your device.
+Turing PDF Editor is **100% client-side**. Your file **never** leaves your device.
 
 - No upload. No server. No account. No tracking. No watermark. No file-size limit.
 - Works offline after the first load.
@@ -102,15 +102,15 @@ your.pdf
 
 Three parts do the heavy lifting:
 
-1. **Text-run merging.** PDFs store text as arbitrary fragments — a single sentence might be a dozen positioned runs. Nib stitches runs that share a baseline into one editable line, which is what makes "click and retype" possible.
-2. **Pixel sampling.** When you edit a line, Nib reads the rendered canvas to sample the original text color *and* the background behind it, so the patch is painted in the page's own colors instead of assuming black-on-white.
+1. **Text-run merging.** PDFs store text as arbitrary fragments — a single sentence might be a dozen positioned runs. Turing stitches runs that share a baseline into one editable line, which is what makes "click and retype" possible.
+2. **Pixel sampling.** When you edit a line, Turing reads the rendered canvas to sample the original text color *and* the background behind it, so the patch is painted in the page's own colors instead of assuming black-on-white.
 3. **Glyph-level font subsetting.** When you type non-Latin text, fontkit carves out just the glyphs you used from your chosen font and pdf-lib embeds that sliver — kilobytes, not megabytes.
 
 No framework, no state library, no build pipeline. View-source works — which, for a tool you feed contracts to, is rather the point.
 
-## Nib vs. the alternatives
+## Turing PDF Editor vs. the alternatives
 
-| | Online PDF editors | Desktop suites | **Nib** |
+| | Online PDF editors | Desktop suites | **Turing** |
 |---|---|---|---|
 | Your file | Uploaded to their servers | Stays local | **Stays local** |
 | Price | Paywalls & watermarks | Subscriptions | **Free (MIT)** |
@@ -148,7 +148,7 @@ Scans are images — there's no text to edit. White-out and add-text still work.
 
 ## Contributing
 
-The whole point of Nib is that it's hackable:
+The whole point of Turing is that it's hackable:
 
 1. Clone, start a static server, open the app.
 2. Edit the JS. Refresh. That's the entire workflow — no build, no watch mode, no dependency install.

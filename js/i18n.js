@@ -21,8 +21,8 @@ const STRINGS = {
     'open.title': 'Open a PDF (⌘O)',
     'toast.saved': 'Saved {name}',
     'toast.loadfail': 'Could not open this file — is it a valid PDF?',
-    'toast.encrypted': 'This PDF is password-protected. Nib can’t edit it yet.',
-    'toast.rotated': 'This text is rotated — Nib can’t edit it yet.',
+    'toast.encrypted': 'This PDF is password-protected and can’t be edited yet.',
+    'toast.rotated': 'This text is rotated — it can’t be edited yet.',
     'toast.noText': 'No editable text on this page — scanned PDFs are images (no OCR yet). White-out and Add text still work.',
     'toast.placeSign': 'Click on the page to place your signature.',
     'toast.fontEmbedded': 'Font embedded: {name}',
@@ -43,7 +43,7 @@ const STRINGS = {
     'sig.uploadHint': 'PNG or JPG — a photo of your paper signature works too.',
     'sig.empty': 'Draw, type or upload a signature first.',
     'font.title': 'A Unicode font is needed',
-    'font.body': 'Some of your text (e.g. 中文) can’t be written with the 14 built-in PDF fonts. Pick a font once and Nib will embed a tiny subset of it — still 100% offline.',
+    'font.body': 'Some of your text (e.g. 中文) can’t be written with the 14 built-in PDF fonts. Pick a font once and only a tiny subset of it gets embedded — still 100% offline.',
     'font.local': 'Use a system font',
     'font.localHint': 'Chrome / Edge only',
     'font.pick': 'Choose a font file (.ttf / .otf)',
@@ -73,7 +73,7 @@ const STRINGS = {
     'open.title': '打开 PDF (⌘O)',
     'toast.saved': '已保存 {name}',
     'toast.loadfail': '无法打开这个文件 — 确定是有效的 PDF 吗？',
-    'toast.encrypted': '这是加密 PDF，Nib 暂时无法编辑。',
+    'toast.encrypted': '这是加密 PDF，暂时无法编辑。',
     'toast.rotated': '这段文字是旋转的，暂时无法编辑。',
     'toast.noText': '这一页没有可编辑的文本层 — 扫描件是图片（暂不支持 OCR）；涂白和添加文字仍然可用。',
     'toast.placeSign': '点击页面放置签名。',
@@ -95,7 +95,7 @@ const STRINGS = {
     'sig.uploadHint': 'PNG 或 JPG — 纸上签名的照片也可以。',
     'sig.empty': '请先手写、输入或上传一个签名。',
     'font.title': '需要一个 Unicode 字体',
-    'font.body': '你的部分文字（如中文）无法用 PDF 内置的 14 种西文字体写入。选择一次字体，Nib 会只嵌入用到的字形子集 — 依然完全离线。',
+    'font.body': '你的部分文字（如中文）无法用 PDF 内置的 14 种西文字体写入。选择一次字体，只会嵌入用到的字形子集 — 依然完全离线。',
     'font.local': '使用系统字体',
     'font.localHint': '仅 Chrome / Edge',
     'font.pick': '选择字体文件 (.ttf / .otf)',
@@ -112,7 +112,7 @@ export const store = {
   set(k, v) { try { localStorage.setItem(k, v); } catch { /* blocked */ } },
 };
 
-let lang = store.get('nib.lang')
+let lang = store.get('turing.lang')
   || (navigator.language && navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en');
 
 export function t(key, params) {
@@ -126,7 +126,7 @@ export function getLang() { return lang; }
 
 export function setLang(l) {
   lang = l;
-  store.set('nib.lang', l);
+  store.set('turing.lang', l);
   applyLang();
 }
 

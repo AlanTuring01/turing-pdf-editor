@@ -1,4 +1,4 @@
-// Nib — a tiny PDF editor that lives in your browser.
+// Turing PDF Editor — a tiny PDF editor that lives in your browser.
 // Rendering: pdf.js · Writing: pdf-lib · Everything stays on this device.
 
 import * as pdfjsLib from '../vendor/pdf.min.mjs';
@@ -37,7 +37,8 @@ const state = {
   pendingSig: null,        // signature waiting for placement {dataUrl,width,height}
 };
 
-window.nib = { state, openBytes, exportBytes, setTool, getRuns: p => state.pages[p]?.runs };
+// console / testing API
+window.turing = { state, openBytes, exportBytes, setTool, getRuns: p => state.pages[p]?.runs };
 
 /* =============== helpers =============== */
 
@@ -1030,7 +1031,7 @@ function fitWidth() {
 
 function wireUI() {
   // theme override via ?theme= or localStorage (handy for screenshots)
-  const theme = new URLSearchParams(location.search).get('theme') || store.get('nib.theme');
+  const theme = new URLSearchParams(location.search).get('theme') || store.get('turing.theme');
   if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
 
   applyLang();
