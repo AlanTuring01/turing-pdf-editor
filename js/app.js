@@ -5,6 +5,7 @@ import * as pdfjsLib from '../vendor/pdf.min.mjs';
 import { t, getLang, setLang, applyLang, store } from './i18n.js';
 import { initSignature, pickSignature } from './signature.js';
 import { exportPdf, winAnsiOk } from './export.js';
+import { initOcr, resetOcr, ocrPageHook, ocrEditClick } from './ocr.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   new URL('../vendor/pdf.worker.min.mjs', import.meta.url).toString();
@@ -110,6 +111,7 @@ async function openBytes(bytes, name) {
   }
   // reset — free the previous document's worker memory
   state.pdfDoc?.loadingTask?.destroy();
+  resetOcr();
   state.pdfBytes = bytes;
   state.pdfDoc = doc;
   state.fileName = name || 'document.pdf';
@@ -206,6 +208,7 @@ async function renderPage(i) {
     ps.runs = buildRuns(ps);
     ps.rendered = true;
     renderOpsForPage(i);
+    ocrPageHook(ps);
   } finally {
     ps.rendering = false;
     if (stale && !ps.rendered) renderPage(i).catch(console.error);
@@ -290,6 +293,7 @@ function buildRuns(ps) {
 
 // Union bbox of a run's spans in normalized (scale-1) page coords.
 function runNRect(ps, run) {
+  if (run.nrect) return { ...run.nrect }; // OCR runs carry their bbox directly
   const pr = ps.el.getBoundingClientRect();
   let x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9;
   for (const idx of run.itemIdxs) {
@@ -591,6 +595,7 @@ function setTool(name) {
 // --- edit existing text ---
 
 function findRunFromSpan(span) {
+  if (span._run) return { ps: span._ps, run: span._run }; // OCR-injected span
   for (const ps of state.pages) {
     if (!ps.textDivs) continue;
     const idx = ps.textDivs.indexOf(span);
@@ -810,8 +815,8 @@ function wireViewer() {
         const hit = findRunFromSpan(span);
         if (hit) { e.preventDefault(); beginRunEdit(hit.ps, hit.run); }
       } else if (ps.runs && ps.runs.length === 0) {
-        // no text layer at all — almost certainly a scanned page
-        toast(t('toast.noText'), 4200);
+        // no text layer at all — almost certainly a scanned page: offer OCR
+        ocrEditClick(ps);
       }
       return;
     }
@@ -1085,12 +1090,14 @@ function wireUI() {
 
   window.addEventListener('keydown', e => {
     // while a modal is open, only Escape (to close it) is handled
-    const sigOpen = !$('#sigModal').hidden, fontOpen = !$('#fontModal').hidden;
-    if (sigOpen || fontOpen) {
+    const sigOpen = !$('#sigModal').hidden, fontOpen = !$('#fontModal').hidden,
+      ocrOpen = !$('#ocrModal').hidden;
+    if (sigOpen || fontOpen || ocrOpen) {
       if (e.key === 'Escape') {
         e.preventDefault();
         if (sigOpen) document.querySelector('[data-close="sigModal"]').click();
-        else $('#fontModal .modal-close').click();
+        else if (fontOpen) $('#fontModal .modal-close').click();
+        else $('#ocrModal .modal-close').click();
       }
       return;
     }
@@ -1125,6 +1132,7 @@ function wireUI() {
   window.addEventListener('resize', () => { /* keep layout; user can hit fit-width */ });
 
   initSignature(toast);
+  initOcr({ state, toast, norm360 });
   wireViewer();
 }
 

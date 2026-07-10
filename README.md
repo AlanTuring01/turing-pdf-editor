@@ -32,7 +32,7 @@ Turing PDF Editor is the missing fourth option: open a tab, click the date, rety
 
 - **Zero build step.** No bundler, no transpiler, no `node_modules`. Clone the repo, serve the folder with any static server, and it runs.
 - **~2,000 lines of vanilla JS** you can actually read in an afternoon. No framework. The whole app is right there.
-- **Vendored dependencies.** [pdf.js](https://mozilla.github.io/pdf.js/) v6 (rendering), [pdf-lib](https://pdf-lib.js.org/) (writing), and [fontkit](https://github.com/foliojs/fontkit) (font subsetting) live in the repo.
+- **Vendored dependencies.** [pdf.js](https://mozilla.github.io/pdf.js/) v6 (rendering), [pdf-lib](https://pdf-lib.js.org/) (writing), [fontkit](https://github.com/foliojs/fontkit) (font subsetting) and [tesseract.js](https://tesseract.projectnaptha.com/) (OCR) live in the repo.
 - **A neat font-subsetting trick.** Non-Latin text needs an embedded font, so Turing subsets yours down to only the glyphs you used — a 22 MB font becomes ~16 KB inside the PDF.
 
 ## Quickstart
@@ -59,6 +59,8 @@ Or skip all that and use the **[live demo](https://alanturing01.github.io/turing
 
 **➕ Add text & white-out.** New text with adjustable size, three colors, multiline. White-out auto-samples the page background color, so it works on non-white pages too.
 
+**🔍 Scanned PDFs? OCR them.** A scanned page is just pixels — hit **Recognize text (OCR)** and an on-device engine (tesseract.js; English & Simplified Chinese bundled) turns it into clickable, editable lines. Your fix is written into the PDF as *real* text — the corrected line is selectable in the output, which is more than the original scan could say. Nothing is uploaded, ever.
+
 **🌏 中文, 日本語, any Unicode.** PDF's 14 built-in fonts are Latin-only — which is why most tools silently break on Chinese or Japanese text. Turing asks once for a font — picked from your system via the Local Font Access API (Chrome/Edge), or drop in any `.ttf`/`.otf` — and embeds only the glyphs you used.
 
 **⌨️ Feels like a real editor.** Undo/redo everything (<kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd>), zoom, one-key tool switching: <kbd>V</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>S</kbd> <kbd>W</kbd>.
@@ -75,7 +77,7 @@ Turing PDF Editor is **100% client-side**. Your file **never** leaves your devic
 - Works offline after the first load.
 - All libraries are vendored locally.
 
-Don't take our word for it — open DevTools and watch the network tab: **zero requests after page load**, including while you open, edit, and save a PDF.
+Don't take our word for it — open DevTools and watch the network tab: the only traffic you will ever see is the app lazy-loading its own vendored files from the same origin (the ~10 MB OCR engine, on first use). **Your PDF is never in any request.**
 
 ## How it works
 
@@ -136,7 +138,7 @@ Not supported.
 Replacement text uses a matched standard font (or your chosen Unicode font), not the document's embedded font. For sans/serif body text it's usually indistinguishable.
 
 **Scanned PDFs?**
-Scans are images — there's no text to edit. White-out and add-text still work.
+Scans are images, so there's no text layer — click **Recognize text (OCR)** on the page instead. Recognition runs entirely on your device (tesseract.js; English and Simplified Chinese are bundled), then every recognized line is click-to-edit like any other text. White-out and add-text work without OCR too.
 
 ## Roadmap
 
@@ -145,6 +147,7 @@ Scans are images — there's no text to edit. White-out and add-text still work.
 - [ ] Form filling
 - [ ] Freehand annotations
 - [ ] PWA offline install
+- [ ] More OCR languages (drop-in traineddata)
 
 ## Contributing
 
